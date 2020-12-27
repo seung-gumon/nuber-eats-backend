@@ -42,12 +42,12 @@ export class UsersService {
       const passwordCorrect = await user.checkPassword(password);
       if (!passwordCorrect) {
         return {
-          ok: false,
+          ok: passwordCorrect,
           error: '비밀번호가 틀렸습니다.',
         };
       }
       return {
-        ok: true,
+        ok: passwordCorrect,
         token: 'lalalal',
       };
     } catch (error) {
