@@ -28,7 +28,7 @@ import { CommonModule } from './common/common.module';
       port: +process.env.DB_PORT,
       username: process.env.USERNAME,
       password: process.env.PASSWORD,
-      database: process.env.DATABASE,
+      database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: process.env.NODE_ENV !== 'prod',
       entities: [User],
