@@ -1,6 +1,6 @@
 import {
-  createAccountInput,
-  createAccountOutput,
+  CreateAccountInput,
+  CreateAccountOutput,
 } from './dtos/create-account.dto';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
@@ -15,6 +15,26 @@ export class UsersResolver {
     return true;
   }
 
-  @Mutation(() => createAccountOutput)
-  createAccount(@Args('input') createAccountInput: createAccountInput) {}
+  @Mutation(() => CreateAccountOutput)
+  async createAccount(
+    @Args('input') CreateAccountInput: CreateAccountInput,
+  ): Promise<CreateAccountOutput> {
+    try {
+      const error = await this.UsersService.createAccount(CreateAccountInput);
+      if (error) {
+        return {
+          error,
+          ok: false,
+        };
+      }
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        error,
+        ok: false,
+      };
+    }
+  }
 }
