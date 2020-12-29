@@ -1,14 +1,19 @@
+import { JwtService } from './../jwt/jwt.service';
+import { ConfigService } from '@nestjs/config';
 import { LoginInput } from './dtos/login.dto';
 import { CreateAccountInput } from './dtos/create-account.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    private readonly config: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async createAccount({
@@ -46,9 +51,10 @@ export class UsersService {
           error: '비밀번호가 틀렸습니다.',
         };
       }
+      const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY'));
       return {
         ok: passwordCorrect,
-        token: 'lalalal',
+        token,
       };
     } catch (error) {
       return {
