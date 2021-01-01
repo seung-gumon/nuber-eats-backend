@@ -51,7 +51,7 @@ export class UsersService {
           error: '비밀번호가 틀렸습니다.',
         };
       }
-      const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY'));
+      const token = this.jwtService.sign(user.id);
       return {
         ok: passwordCorrect,
         token,
@@ -62,5 +62,9 @@ export class UsersService {
         error,
       };
     }
+  }
+
+  async findById(id: number): Promise<User> {
+    return this.users.findOne({ id });
   }
 }

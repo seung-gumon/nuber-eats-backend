@@ -1,5 +1,11 @@
+import { JwtMiddleware } from './jwt/jwt.middleware';
 import { User } from './users/entities/user.entity';
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import * as Joi from 'joi';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -32,7 +38,7 @@ import { JwtModule } from './jwt/jwt.module';
       password: process.env.PASSWORD,
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod',
-      logging: process.env.NODE_ENV !== 'prod',
+      logging: false,
       entities: [User],
     }),
     GraphQLModule.forRoot({
@@ -47,4 +53,10 @@ import { JwtModule } from './jwt/jwt.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(JwtMiddleware)
+      .forRoutes({ path: `/graphql`, method: RequestMethod.ALL });
+  }
+}
