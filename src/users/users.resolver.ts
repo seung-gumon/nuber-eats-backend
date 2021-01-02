@@ -1,3 +1,4 @@
+import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
 import { AuthGuard } from './../auth/auth.guard';
 import { LoginOutput, LoginInput } from './dtos/login.dto';
 import {
@@ -53,5 +54,27 @@ export class UsersResolver {
   @UseGuards(AuthGuard)
   me(@AuthUser() authUser: User) {
     return authUser;
+  }
+
+  @UseGuards(AuthGuard)
+  @Query(() => UserProfileOutput)
+  async useProfile(
+    @Args() { userId }: UserProfileInput,
+  ): Promise<UserProfileOutput> {
+    try {
+      const user = await this.UsersService.findById(userId);
+      if (!user) {
+        throw Error();
+      }
+      return {
+        ok: Boolean(user),
+        user,
+      };
+    } catch (e) {
+      return {
+        error: '유저를 찾지 못하였습니다.',
+        ok: false,
+      };
+    }
   }
 }
