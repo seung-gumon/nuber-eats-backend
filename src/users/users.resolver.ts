@@ -11,11 +11,6 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 export class UsersResolver {
   constructor(private readonly UsersService: UsersService) {}
 
-  @Query(() => Boolean)
-  hi() {
-    return true;
-  }
-
   @Mutation(() => CreateAccountOutput)
   async createAccount(
     @Args('input') CreateAccountInput: CreateAccountInput,
