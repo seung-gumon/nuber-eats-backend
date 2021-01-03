@@ -1,3 +1,4 @@
+import { EditProfileOutput, EditProfileInput } from './dtos/edit-profile.dto';
 import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
 import { AuthGuard } from './../auth/auth.guard';
 import { LoginOutput, LoginInput } from './dtos/login.dto';
@@ -74,6 +75,25 @@ export class UsersResolver {
       return {
         error: '유저를 찾지 못하였습니다.',
         ok: false,
+      };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => EditProfileOutput)
+  async editProfile(
+    @AuthUser() authUser: User,
+    @Args('input') editProfileInput: EditProfileInput,
+  ): Promise<EditProfileOutput> {
+    try {
+      await this.UsersService.editProfile(authUser.id, editProfileInput);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
       };
     }
   }
