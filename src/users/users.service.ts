@@ -8,11 +8,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
+import { Verification } from './entities/verification.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(Verification) private readonly verification: Repository<Verification>,
     private readonly config: ConfigService,
     private readonly jwtService: JwtService,
   ) {}
@@ -27,7 +29,9 @@ export class UsersService {
       if (exists) {
         return '해당 이메일을 가진 사용자가 이미 존재합니다';
       }
-      await this.users.save(this.users.create({ email, password, role }));
+
+      const user = await this.users.save(this.users.create({ email, password, role }));
+      await this.verification.save(this.verification.create({user}))
     } catch (e) {
       return '계정을 생성 할 수 없습니다';
     }
@@ -76,6 +80,8 @@ export class UsersService {
     const user = await this.users.findOne(userId);
     if (email) {
       user.email = email;
+      user.verified = false;
+      await this.verification.save(this.verification.create({user}))
     }
     if (password) {
       user.password = password;
