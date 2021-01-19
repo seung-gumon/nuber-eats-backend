@@ -11,6 +11,7 @@ import { User } from './entities/user.entity';
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthUser } from 'src/auth/auth-user.decorator';
+import {VerifyEmailInput, VerifyEmailOutput} from "./dtos/verify-email.dto";
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -97,4 +98,21 @@ export class UsersResolver {
       };
     }
   }
+
+  @Mutation(returns => VerifyEmailOutput)
+  async verifyEmail(@Args('input') {code}: VerifyEmailInput): Promise<VerifyEmailOutput> {
+    try {
+      await this.UsersService.verifyEmail(code);
+      return {
+        ok: true
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error
+      }
+    }
+  }
+
+
 }
