@@ -1,8 +1,7 @@
 import {DynamicModule, Module} from '@nestjs/common';
-import {JwtModuleOptions} from "../jwt/jwt.interfaces";
 import {CONFIG_OPTIONS} from "../common/common.constants";
-import {JwtService} from "../jwt/jwt.service";
 import {MailModuleOptions} from "./mail.interfaces";
+import {MailService} from "./mail.service";
 
 
 @Module({})
@@ -15,9 +14,9 @@ export class MailModule {
                     provide: CONFIG_OPTIONS,
                     useValue: options,
                 },
-
+                MailService
             ],
-            exports: [],
+            exports: [MailService],
         };
     }
 }
