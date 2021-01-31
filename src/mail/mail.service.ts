@@ -15,7 +15,7 @@ export class MailService {
     private async sendEmail(subject: string, templateName: string, emailVars: EmailVar[]) {
         const form = new FormData();
         form.append("from", `seungseok from SeokberEats <mailgun@${this.options.domain}>`)
-        form.append("to", `b9327912@gmail.com`)
+        form.append("to", `b9327912@naver.com`)
         form.append("subject", subject);
         form.append('template', templateName)
         emailVars.forEach(eVar => form.append(`v:${eVar.key}`, eVar.value))
@@ -36,7 +36,7 @@ export class MailService {
 
 
     sendVerificationEmail(email: string, code: string) {
-        this.sendEmail("Verify Your Email", "vertify-email",
+        this.sendEmail("Verify Your Email", "verify-email",
             [
                 {"key": 'code', "value": code},
                 {"key": 'username', 'value': email}
