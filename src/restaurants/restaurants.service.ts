@@ -4,12 +4,14 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {CreateRestaurantInput, CreateRestaurantOutput} from "./dtos/create-restaurant.dto";
 import {User} from "../users/entities/user.entity";
+import {Category} from "./entities/category.entity";
 
 
 @Injectable()
 export class RestaurantsService {
     constructor(
-        @InjectRepository(Restaurant) private readonly restaurant: Repository<Restaurant>
+        @InjectRepository(Restaurant) private readonly restaurant: Repository<Restaurant>,
+        @InjectRepository(Category) private readonly categories : Repository<Category>
     ) {
     }
 
@@ -19,7 +21,15 @@ export class RestaurantsService {
     ): Promise<CreateRestaurantOutput> {
         try {
             const newRestaurant = this.restaurant.create(createRestaurantInput);
-            await this.restaurant.save(newRestaurant)
+            newRestaurant.owner = owner;
+            const categoryName = createRestaurantInput.categoryName.trim().toLowerCase();
+            const categorySlug = categoryName.replace(/ /g, '-')
+            let category = await this.categories.findOne({slug: categorySlug});
+            if (!category) {
+                category = await this.categories.save(this.categories.create({slug: categorySlug, name: categoryName}));
+            }
+            newRestaurant.category = category;
+            await this.restaurant.save(newRestaurant);
             return {
                 ok: true
             }

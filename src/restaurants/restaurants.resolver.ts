@@ -4,18 +4,18 @@ import {RestaurantsService} from "./restaurants.service";
 import {CreateRestaurantInput, CreateRestaurantOutput} from "./dtos/create-restaurant.dto";
 import {AuthUser} from "../auth/auth-user.decorator";
 import {User} from "../users/entities/user.entity";
+import {CoreOutput} from "../common/dtos/output.dto";
 
 @Resolver(() => Restaurant)
 export class RestaurantResolver {
     constructor(private readonly restaurantService: RestaurantsService) {
     }
 
-    @Mutation(returns => Boolean)
+    @Mutation(returns => CoreOutput)
     async createRestaurant(
         @AuthUser() authUser: User,
         @Args("input") createRestaurantInput: CreateRestaurantInput
     ): Promise<CreateRestaurantOutput> {
         return this.restaurantService.createRestaurant(authUser, createRestaurantInput)
     }
-
 }
