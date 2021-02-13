@@ -12,6 +12,7 @@ import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import {VerifyEmailInput, VerifyEmailOutput} from "./dtos/verify-email.dto";
+import {Role} from "../auth/role.decorator";
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -53,12 +54,12 @@ export class UsersResolver {
   }
 
   @Query((returns) => User)
-  @UseGuards(AuthGuard)
+  @Role(["Any"])
   me(@AuthUser() authUser: User) {
     return authUser;
   }
 
-  @UseGuards(AuthGuard)
+  @Role(["Any"])
   @Query(() => UserProfileOutput)
   async useProfile(
     @Args() { userId }: UserProfileInput,
@@ -80,8 +81,9 @@ export class UsersResolver {
     }
   }
 
-  @UseGuards(AuthGuard)
+
   @Mutation(() => EditProfileOutput)
+  @Role(["Any"])
   async editProfile(
     @AuthUser() authUser: User,
     @Args('input') editProfileInput: EditProfileInput,
