@@ -23,7 +23,7 @@ export class Restaurant extends CoreEntity {
     @IsOptional()
     coverImg: string
 
-    @Field(type => String, {defaultValue: "강남"})
+    @Field(type => String)
     @Column()
     @IsString()
     address: string
