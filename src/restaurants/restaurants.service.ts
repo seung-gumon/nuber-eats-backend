@@ -9,6 +9,7 @@ import {EditRestaurantInput, EditRestaurantOutput} from "./dtos/edit-restaurant.
 import {CategoryRepository} from "./repositories/category.repository";
 import {DeleteRestaurantInput, DeleteRestaurantOutput} from "./dtos/delete-restaurant.dto";
 import {CoreOutput} from "../common/dtos/output.dto";
+import {AllCategoriesOutput} from "./dtos/all-categories.dto";
 
 
 @Injectable()
@@ -111,4 +112,19 @@ export class RestaurantsService {
         }
     }
 
+
+    async allCategories() : Promise<AllCategoriesOutput> {
+        try {
+            const categories = await this.categories.find();
+            return {
+                ok : true,
+                categories
+            }
+        }catch{
+            return {
+                ok : false,
+                error : '카테고리를 불러 올 수 없습니다.'
+            }
+        }
+    }
 }
