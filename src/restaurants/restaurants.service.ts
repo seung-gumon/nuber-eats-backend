@@ -10,6 +10,7 @@ import {CategoryRepository} from "./repositories/category.repository";
 import {DeleteRestaurantInput, DeleteRestaurantOutput} from "./dtos/delete-restaurant.dto";
 import {CoreOutput} from "../common/dtos/output.dto";
 import {AllCategoriesOutput} from "./dtos/all-categories.dto";
+import {CategoryInput, CategoryOutput} from "./dtos/category.dto";
 
 
 @Injectable()
@@ -113,17 +114,42 @@ export class RestaurantsService {
     }
 
 
-    async allCategories() : Promise<AllCategoriesOutput> {
+    async allCategories(): Promise<AllCategoriesOutput> {
         try {
             const categories = await this.categories.find();
             return {
-                ok : true,
+                ok: true,
                 categories
             }
-        }catch{
+        } catch {
             return {
-                ok : false,
-                error : '카테고리를 불러 올 수 없습니다.'
+                ok: false,
+                error: '카테고리를 불러 올 수 없습니다.'
+            }
+        }
+    }
+
+    countRestaurant(category: Category) {
+        return this.restaurant.count({category});
+    }
+
+    async findCategoryBySlug({slug}: CategoryInput): Promise<CategoryOutput> {
+        try {
+            const category = await this.categories.findOne({slug}, {relations: ['restaurants']});
+            if (!category) {
+                return {
+                    ok: false,
+                    error: '카테고리를 찾지 못하였습니다.'
+                }
+            }
+            return {
+                ok: true,
+                category
+            }
+        } catch {
+            return {
+                ok: false,
+                error: '카테고리를 찾지 못하였습니다.'
             }
         }
     }
