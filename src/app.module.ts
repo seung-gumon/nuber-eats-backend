@@ -48,7 +48,7 @@ import {Dish} from "./restaurants/entities/dish.entity";
             database: process.env.DB_NAME,
             synchronize: process.env.NODE_ENV !== 'prod',
             logging: false,
-            entities: [User, Verification, Restaurant, Category ,Dish],
+            entities: [User, Verification, Restaurant, Category, Dish],
         }),
         GraphQLModule.forRoot({
             autoSchemaFile: true,
