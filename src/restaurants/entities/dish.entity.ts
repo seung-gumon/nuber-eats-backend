@@ -5,15 +5,25 @@ import {IsNumber, IsString, Length} from "class-validator";
 import {Restaurant} from "./restaurant.entity";
 
 
+@InputType('DishChoiceInputType', {isAbstract: true})
+@ObjectType()
+class DishChoice {
+    @Field(() => String)
+    name: string;
+    @Field(() => Int, {nullable: true})
+    extra ?: number;
+}
+
+
 @InputType('DishOptionInputType', {isAbstract: true})
 @ObjectType()
 class DishOption {
     @Field(() => String)
     name: string;
-    @Field(() => [String] , {nullable : true})
-    choice?: string[]
-    @Field(() => Int)
-    extra: number
+    @Field(() => [DishChoice], {nullable: true})
+    choice?: DishChoice[]
+    @Field(() => Int, {nullable: true})
+    extra?: number
 }
 
 
@@ -57,8 +67,8 @@ export class Dish extends CoreEntity {
     @RelationId((dish: Dish) => dish.restaurant)
     restaurantId: number;
 
-    @Field(() => DishOption , {nullable : true})
-    @Column({type: "json" , nullable : true})
-    options?: DishOption[]
+    @Field(() => [DishOption], {nullable: true})
+    @Column({type: "json", nullable: true})
+    options?: DishChoice[]
 
 }

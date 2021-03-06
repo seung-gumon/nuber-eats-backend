@@ -15,6 +15,9 @@ import {RestaurantsInput, RestaurantsOutput} from "./dtos/restaurants.dto";
 import {RestaurantInput, RestaurantOutput} from "./dtos/restaurant.dto";
 import {SearchRestaurantInput, SearchRestaurantOutput} from "./dtos/search-restaurant.dto";
 import {CreateDishInput, CreateDishOutput} from "./dtos/create-dish.dto";
+import {Dish} from "./entities/dish.entity";
+import {EditDishInput, EditDishOutput} from "./dtos/edit-dish.dto";
+import {DeleteDishInput, DeleteDishOutput} from "./dtos/delete-dish.dto";
 
 
 
@@ -24,7 +27,8 @@ export class RestaurantsService {
         @InjectRepository(Restaurant)
         private readonly restaurant: Repository<Restaurant>,
         private readonly categories: CategoryRepository,
-
+        @InjectRepository(Dish)
+        private readonly dishes : Repository<Dish>
     ) {
     }
 
@@ -197,6 +201,10 @@ export class RestaurantsService {
                     error : '가게를 찾지 못하였습니다.'
                 }
             }
+            return {
+                ok : true,
+                restaurant
+            }
         }catch {
             return {
                 ok :false,
@@ -230,9 +238,90 @@ export class RestaurantsService {
     }
 
 
-    async createDish(owner:User , createDishInput : CreateDishInput) : Promise<CreateDishOutput> {
-        return {
-            ok : false
+    async createDish(owner: User, createDishInput: CreateDishInput): Promise<CreateDishOutput> {
+        try {
+            const restaurant = await this.restaurant.findOne(createDishInput.restaurantId);
+            if (!restaurant) {
+                return {
+                    ok: false,
+                    error: '레스토랑을 찾지 못하였습니다'
+                }
+            }
+            if (owner.id !== restaurant.ownerId) {
+                return {
+                    ok: false,
+                    error: '해당 가게의 주인이 아닙니다.'
+                }
+            }
+            await this.dishes.save(await this.dishes.create({...createDishInput, restaurant}));
+            return {
+                ok: true
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error : '메뉴를 만들 수 없습니다.'
+            }
+        }
+    }
+
+
+    async editDish(owner: User, editDishInput: EditDishInput): Promise<EditDishOutput> {
+        try {
+            const dish = await this.dishes.findOne(editDishInput.dishId, {relations: ['restaurant']});
+            if (!dish) {
+                return {
+                    ok: false,
+                    error: '메뉴를 찾지 못하였습니다.'
+                };
+            }
+            if (dish.restaurant.ownerId !== owner.id) {
+                return {
+                    ok: false,
+                    error: "업데이트 권한이 없습니다."
+                }
+            }
+            await this.dishes.save([
+                {
+                    id: editDishInput.dishId,
+                    ...editDishInput
+                }
+            ])
+            return {
+                ok : true
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error
+            }
+        }
+    }
+
+    async deleteDish(owner: User, {dishId}: DeleteDishInput): Promise<DeleteDishOutput> {
+        try {
+            const dish = await this.dishes.findOne(dishId, {relations: ['restaurant']});
+            if (!dish) {
+                return {
+                    ok: false,
+                    error: '메뉴를 찾지 못하였습니다.'
+                };
+            }
+            if (dish.restaurant.ownerId !== owner.id) {
+                return {
+                    ok: false,
+                    error: "삭제할 권한이 없습니다."
+                }
+            }
+            await this.dishes.delete(dishId);
+            return {
+                ok : true,
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error
+            }
         }
     }
 
