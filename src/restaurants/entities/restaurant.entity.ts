@@ -5,6 +5,7 @@ import {CoreEntity} from "../../common/entities/core.entity";
 import {Category} from "./category.entity";
 import {User} from "../../users/entities/user.entity";
 import {Dish} from "./dish.entity";
+import {Order} from "../../orders/entities/order.entity";
 
 
 @InputType("RestaurantInputType", {isAbstract: true})
@@ -49,5 +50,12 @@ export class Restaurant extends CoreEntity {
         dish => dish.restaurant,
     )
     menu: Dish[];
+
+    @Field(() => [Order])
+    @OneToMany(
+        type => Order,
+        order => order.restaurant
+    )
+    orders : Order[]
 
 }
