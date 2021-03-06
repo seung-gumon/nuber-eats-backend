@@ -17,7 +17,7 @@ class DishChoice {
 
 @InputType('DishOptionInputType', {isAbstract: true})
 @ObjectType()
-class DishOption {
+export class DishOption {
     @Field(() => String)
     name: string;
     @Field(() => [DishChoice], {nullable: true})
@@ -69,6 +69,6 @@ export class Dish extends CoreEntity {
 
     @Field(() => [DishOption], {nullable: true})
     @Column({type: "json", nullable: true})
-    options?: DishChoice[]
+    options?: DishOption[]
 
 }
