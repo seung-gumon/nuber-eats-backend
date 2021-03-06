@@ -35,14 +35,14 @@ export class Order extends CoreEntity {
     restaurant: Restaurant
 
     @Field(() => [Dish])
-    @ManyToMany(type => Dish)
+    @ManyToMany(() => Dish)
     @JoinTable()
     dishes: Dish[]
 
 
-    @Column()
-    @Field(() => Float)
-    total: number
+    @Column({nullable:true})
+    @Field(() => Float , {nullable : true})
+    total?: number
 
 
     @Column({type: 'enum', enum: OrderStatus})
