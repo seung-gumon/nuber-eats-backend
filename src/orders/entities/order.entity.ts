@@ -3,7 +3,6 @@ import {Column, Entity, ManyToOne, ManyToMany, JoinTable} from "typeorm";
 import {CoreEntity} from "../../common/entities/core.entity";
 import {User} from "../../users/entities/user.entity";
 import {Restaurant} from "../../restaurants/entities/restaurant.entity";
-import {Dish} from "../../restaurants/entities/dish.entity";
 import {OrderItem} from "./order-item.entity";
 import {IsEnum, IsNumber} from "class-validator";
 
@@ -32,9 +31,9 @@ export class Order extends CoreEntity {
     @ManyToOne(type => User, User => User.rides, {onDelete: "SET NULL", nullable: true})
     driver ?: User
 
-    @Field(() => Restaurant)
+    @Field(() => Restaurant, {nullable: true})
     @ManyToOne(() => Restaurant, Restaurant => Restaurant.orders, {onDelete: 'SET NULL', nullable: true})
-    restaurant: Restaurant
+    restaurant?: Restaurant
 
     @Field(() => [OrderItem])
     @ManyToMany(() => OrderItem)
@@ -42,13 +41,13 @@ export class Order extends CoreEntity {
     items: OrderItem[]
 
 
-    @Column({nullable:true})
-    @Field(() => Float , {nullable : true})
+    @Column({nullable: true})
+    @Field(() => Float, {nullable: true})
     @IsNumber()
     total?: number
 
 
-    @Column({type: 'enum', enum: OrderStatus})
+    @Column({type: 'enum', enum: OrderStatus, default: OrderStatus.Pending})
     @Field(() => OrderStatus)
     @IsEnum(OrderStatus)
     status: OrderStatus

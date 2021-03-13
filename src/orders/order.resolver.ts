@@ -15,9 +15,9 @@ export class OrderResolver {
 
     @Mutation(() => CreateOrderOutput)
     @Role(['Client'])
-    async createOrder(@AuthUser() customer: User, @Args("input")createOrderInput: CreateOrderInput): Promise<CreateOrderOutput> {
-        return {
-            ok: true
-        }
+    async createOrder(
+        @AuthUser() customer: User,
+        @Args("input")createOrderInput: CreateOrderInput): Promise<CreateOrderOutput> {
+        return await this.ordersService.createOrder(customer , createOrderInput);
     }
 }
