@@ -1,55 +1,66 @@
-import {Field, Float, InputType, ObjectType, registerEnumType} from '@nestjs/graphql';
-import {Column, Entity, ManyToOne, ManyToMany, JoinTable} from "typeorm";
-import {CoreEntity} from "../../common/entities/core.entity";
-import {User} from "../../users/entities/user.entity";
-import {Restaurant} from "../../restaurants/entities/restaurant.entity";
-import {OrderItem} from "./order-item.entity";
-import {IsEnum, IsNumber} from "class-validator";
+import {
+    Field,
+    Float,
+    InputType,
+    ObjectType,
+    registerEnumType,
+} from '@nestjs/graphql';
+import { IsEnum, IsNumber } from 'class-validator';
+import { CoreEntity } from 'src/common/entities/core.entity';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import { OrderItem } from './order-item.entity';
 
-
-enum OrderStatus {
+export enum OrderStatus {
     Pending = 'Pending',
     Cooking = 'Cooking',
     PickedUp = 'PickedUp',
     Delivered = 'Delivered',
 }
 
+registerEnumType(OrderStatus, { name: 'OrderStatus' });
 
-registerEnumType(OrderStatus, {name: 'OrderStatus'})
-
-
-@InputType("OrderInputType", {isAbstract: true})
+@InputType('OrderInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class Order extends CoreEntity {
+    @Field(type => User, { nullable: true })
+    @ManyToOne(
+        type => User,
+        user => user.orders,
+        { onDelete: 'SET NULL', nullable: true },
+    )
+    customer?: User;
 
-    @Field(() => User, {nullable: true})
-    @ManyToOne(type => User, User => User.orders, {onDelete: "SET NULL", nullable: true})
-    customer ?: User
+    @Field(type => User, { nullable: true })
+    @ManyToOne(
+        type => User,
+        user => user.rides,
+        { onDelete: 'SET NULL', nullable: true },
+    )
+    driver?: User;
 
-    @Field(() => User, {nullable: true})
-    @ManyToOne(type => User, User => User.rides, {onDelete: "SET NULL", nullable: true})
-    driver ?: User
+    @Field(type => Restaurant, { nullable: true })
+    @ManyToOne(
+        type => Restaurant,
+        restaurant => restaurant.orders,
+        { onDelete: 'SET NULL', nullable: true },
+    )
+    restaurant?: Restaurant;
 
-    @Field(() => Restaurant, {nullable: true})
-    @ManyToOne(() => Restaurant, Restaurant => Restaurant.orders, {onDelete: 'SET NULL', nullable: true})
-    restaurant?: Restaurant
-
-    @Field(() => [OrderItem])
-    @ManyToMany(() => OrderItem)
+    @Field(type => [OrderItem])
+    @ManyToMany(type => OrderItem)
     @JoinTable()
-    items: OrderItem[]
+    items: OrderItem[];
 
-
-    @Column({nullable: true})
-    @Field(() => Float, {nullable: true})
+    @Column({ nullable: true })
+    @Field(type => Float, { nullable: true })
     @IsNumber()
-    total?: number
+    total?: number;
 
-
-    @Column({type: 'enum', enum: OrderStatus, default: OrderStatus.Pending})
-    @Field(() => OrderStatus)
+    @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Pending })
+    @Field(type => OrderStatus)
     @IsEnum(OrderStatus)
-    status: OrderStatus
-
+    status: OrderStatus;
 }
