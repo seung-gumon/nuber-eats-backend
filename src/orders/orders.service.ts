@@ -8,6 +8,7 @@ import {Restaurant} from "../restaurants/entities/restaurant.entity";
 import {OrderItem} from "./entities/order-item.entity";
 import {Dish} from "../restaurants/entities/dish.entity";
 import {GetOrdersInputType, GetOrdersOutput} from "./dtos/get-orders.dto";
+import {GetOrderInput, GetOrderOutput} from "./dtos/get-order.dto";
 
 @Injectable()
 export class OrderService {
@@ -105,12 +106,14 @@ export class OrderService {
                 orders = await this.orders.find({
                     where: {
                         customer: user,
+                        ...(status && {status})
                     }
                 })
             } else if (user.role === UserRole.Delivery) {
                 orders = await this.orders.find({
                     where: {
                         driver: user,
+                        ...(status && {status})
                     }
                 })
             } else if (user.role === UserRole.Owner) {
@@ -121,6 +124,9 @@ export class OrderService {
                     relations: ['orders']
                 });
                 orders = restaurants.flatMap(restaurant => restaurant.orders);
+                if (status) {
+                    orders = orders.filter(order => order.status === status);
+                }
             }
             return {
                 ok: true,
@@ -130,6 +136,34 @@ export class OrderService {
             return {
                 ok: false,
                 error
+            }
+        }
+    }
+
+
+    async getOrder(user: User, {id: orderId}: GetOrderInput): Promise<GetOrderOutput> {
+        try {
+            const order = await this.orders.findOne(orderId, {relations: ['restaurant']});
+            if (!order) {
+                return {
+                    ok: false,
+                    error: "주문을 찾을 수 없습니다!"
+                }
+            }
+            if (order.customerId !== user.id && order.driverId !== user.id && order.restaurant.ownerId !== user.id) {
+                return {
+                    ok: false,
+                    error: "권한이 없습니다"
+                }
+            }
+            return {
+                ok: true,
+                order
+            }
+        } catch (e) {
+            return {
+                ok: false,
+                error: '주문을 불러올 수 없습니다.'
             }
         }
     }
