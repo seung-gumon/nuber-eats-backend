@@ -7,6 +7,7 @@ import {User} from "../users/entities/user.entity";
 import {Role} from "../auth/role.decorator";
 import {GetOrdersInputType, GetOrdersOutput} from "./dtos/get-orders.dto";
 import {GetOrderInput, GetOrderOutput} from "./dtos/get-order.dto";
+import {EditOrderInput, EditOrderOutput} from "./dtos/edit-order.dto";
 
 
 @Resolver(() => Order)
@@ -42,6 +43,16 @@ export class OrderResolver {
         @Args("input") getOrderInput : GetOrderInput
     ) : Promise<GetOrderOutput> {
         return this.ordersService.getOrder(user,getOrderInput);
+    }
+
+
+    @Mutation(() => EditOrderOutput)
+    @Role(['Any'])
+    async editOrder(
+        @AuthUser() user : User,
+        @Args('input') editOrderInput : EditOrderInput
+    ) : Promise<EditOrderOutput> {
+        return this.ordersService.editOrder(user , editOrderInput)
     }
 
 }
