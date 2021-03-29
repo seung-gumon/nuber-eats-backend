@@ -8,14 +8,20 @@ import {Role} from "../auth/role.decorator";
 import {GetOrdersInputType, GetOrdersOutput} from "./dtos/get-orders.dto";
 import {GetOrderInput, GetOrderOutput} from "./dtos/get-order.dto";
 import {EditOrderInput, EditOrderOutput} from "./dtos/edit-order.dto";
+import {Inject} from "@nestjs/common";
+import {PUB_SUB} from "../common/common.constants";
 import {PubSub} from "graphql-subscriptions";
 
-const pubSub = new PubSub();
+
+
 
 
 @Resolver(() => Order)
 export class OrderResolver {
-    constructor(private readonly ordersService: OrderService) {
+    constructor(
+        private readonly ordersService: OrderService,
+        @Inject(PUB_SUB) private readonly pubSub: PubSub
+    ) {
     }
 
 
@@ -61,7 +67,7 @@ export class OrderResolver {
 
     @Subscription(() => String)
     orderSubscription(){
-        return pubSub.asyncIterator("hotPotatos");
+        return this.pubSub.asyncIterator("hotPotatos");
     }
 
 }
