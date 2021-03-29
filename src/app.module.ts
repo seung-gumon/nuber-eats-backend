@@ -19,7 +19,7 @@ import {Category} from "./restaurants/entities/category.entity";
 import {RestaurantsModule} from "./restaurants/restaurants.module";
 import {AuthModule} from "./auth/auth.module";
 import {Dish} from "./restaurants/entities/dish.entity";
-import { OrdersModule } from './orders/orders.module';
+import {OrdersModule} from './orders/orders.module';
 import {Order} from "./orders/entities/order.entity";
 import {OrderItem} from "./orders/entities/order-item.entity";
 
@@ -51,13 +51,16 @@ import {OrderItem} from "./orders/entities/order-item.entity";
             database: process.env.DB_NAME,
             synchronize: process.env.NODE_ENV !== 'prod',
             logging: false,
-            entities: [User, Verification, Restaurant, Category, Dish , Order , OrderItem],
+            entities: [User, Verification, Restaurant, Category, Dish, Order, OrderItem],
         }),
         GraphQLModule.forRoot({
-            installSubscriptionHandlers : true,
+            installSubscriptionHandlers: true,
             autoSchemaFile: true,
-            context: ({req}) => {
-                return {user : req['user']}
+            context: ({req, connection}) => {
+                const TOKEN_KEY = 'x-jwt';
+                return {
+                    token: req ? req.headers[TOKEN_KEY] : connection.context[TOKEN_KEY],
+                }
             },
         }),
         JwtModule.forRoot({
@@ -76,10 +79,5 @@ import {OrderItem} from "./orders/entities/order-item.entity";
     controllers: [],
     providers: [],
 })
-export class AppModule implements NestModule {
-    configure(consumer: MiddlewareConsumer) {
-        consumer
-            .apply(JwtMiddleware)
-            .forRoutes({path: `/graphql`, method: RequestMethod.POST});
-    }
+export class AppModule {
 }

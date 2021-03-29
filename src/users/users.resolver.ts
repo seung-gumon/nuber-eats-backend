@@ -1,120 +1,62 @@
-import { EditProfileOutput, EditProfileInput } from './dtos/edit-profile.dto';
-import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
-import { AuthGuard } from './../auth/auth.guard';
-import { LoginOutput, LoginInput } from './dtos/login.dto';
+import { UseGuards } from '@nestjs/common';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Role } from 'src/auth/role.decorator';
 import {
   CreateAccountInput,
   CreateAccountOutput,
 } from './dtos/create-account.dto';
-import { UsersService } from './users.service';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
+import { LoginInput, LoginOutput } from './dtos/login.dto';
+import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
+import { VerifyEmailInput, VerifyEmailOutput } from './dtos/verify-email.dto';
 import { User } from './entities/user.entity';
-import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
-import { AuthUser } from 'src/auth/auth-user.decorator';
-import {VerifyEmailInput, VerifyEmailOutput} from "./dtos/verify-email.dto";
-import {Role} from "../auth/role.decorator";
+import {UserService} from "./user.service";
 
-@Resolver(() => User)
-export class UsersResolver {
-  constructor(private readonly UsersService: UsersService) {}
+@Resolver(of => User)
+export class UserResolver {
+  constructor(private readonly usersService: UserService) {}
 
-  @Mutation(() => CreateAccountOutput)
+  @Mutation(returns => CreateAccountOutput)
   async createAccount(
-    @Args('input') CreateAccountInput: CreateAccountInput,
+      @Args('input') createAccountInput: CreateAccountInput,
   ): Promise<CreateAccountOutput> {
-    try {
-      const error = await this.UsersService.createAccount(CreateAccountInput);
-      if (error) {
-        return {
-          error,
-          ok: false,
-        };
-      }
-      return {
-        ok: true,
-      };
-    } catch (error) {
-      return {
-        error,
-        ok: false,
-      };
-    }
+    return this.usersService.createAccount(createAccountInput);
   }
 
-  @Mutation(() => LoginOutput)
+  @Mutation(returns => LoginOutput)
   async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
-    try {
-      return this.UsersService.login(loginInput);
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.usersService.login(loginInput);
   }
 
-  @Query((returns) => User)
-  @Role(["Any"])
+  @Query(returns => User)
+  @Role(['Any'])
   me(@AuthUser() authUser: User) {
     return authUser;
   }
 
-  @Role(["Any"])
-  @Query(() => UserProfileOutput)
-  async useProfile(
-    @Args() { userId }: UserProfileInput,
+  @Query(returns => UserProfileOutput)
+  @Role(['Any'])
+  async userProfile(
+      @Args() userProfileInput: UserProfileInput,
   ): Promise<UserProfileOutput> {
-    try {
-      const user = await this.UsersService.findById(userId);
-      if (!user) {
-        throw Error();
-      }
-      return {
-        ok: Boolean(user),
-        user,
-      };
-    } catch (e) {
-      return {
-        error: '유저를 찾지 못하였습니다.',
-        ok: false,
-      };
-    }
+    return this.usersService.findById(userProfileInput.userId);
   }
 
-
-  @Mutation(() => EditProfileOutput)
-  @Role(["Any"])
+  @Mutation(returns => EditProfileOutput)
+  @Role(['Any'])
   async editProfile(
-    @AuthUser() authUser: User,
-    @Args('input') editProfileInput: EditProfileInput,
+      @AuthUser() authUser: User,
+      @Args('input') editProfileInput: EditProfileInput,
   ): Promise<EditProfileOutput> {
-    try {
-      await this.UsersService.editProfile(authUser.id, editProfileInput);
-      return {
-        ok: true,
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.usersService.editProfile(authUser.id, editProfileInput);
   }
 
   @Mutation(returns => VerifyEmailOutput)
-  async verifyEmail(@Args('input') {code}: VerifyEmailInput): Promise<VerifyEmailOutput> {
-    try {
-      await this.UsersService.verifyEmail(code);
-      return {
-        ok: true
-      }
-    } catch (error) {
-      return {
-        ok: false,
-        error
-      }
-    }
+  verifyEmail(
+      @Args('input') { code }: VerifyEmailInput,
+  ): Promise<VerifyEmailOutput> {
+    return this.usersService.verifyEmail(code);
   }
-
-
 }
