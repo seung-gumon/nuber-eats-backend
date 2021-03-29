@@ -1,7 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
-import {Order, OrderStatus} from "./entities/order.entity";
+import {Order} from "./entities/order.entity";
 import {CreateOrderInput, CreateOrderOutput} from "./dtos/create-order.dto";
 import {User, UserRole} from "../users/entities/user.entity";
 import {Restaurant} from "../restaurants/entities/restaurant.entity";
@@ -9,7 +9,6 @@ import {OrderItem} from "./entities/order-item.entity";
 import {Dish} from "../restaurants/entities/dish.entity";
 import {GetOrdersInputType, GetOrdersOutput} from "./dtos/get-orders.dto";
 import {GetOrderInput, GetOrderOutput} from "./dtos/get-order.dto";
-import {EditOrderInput, EditOrderOutput} from "./dtos/edit-order.dto";
 
 @Injectable()
 export class OrderService {
@@ -91,6 +90,7 @@ export class OrderService {
                 ok: true,
             }
         } catch (e) {
+            console.log(e);
             return {
                 ok: false,
                 error: "주문을 하지 못하였습니다."
@@ -140,20 +140,6 @@ export class OrderService {
         }
     }
 
-    canSeeOrder(user: User, order: Order): boolean {
-        let canSee = true;
-        if (user.role === UserRole.Client && order.customerId !== user.id) {
-            canSee = false;
-        }
-        if (user.role === UserRole.Delivery && order.driverId !== user.id) {
-            canSee = false;
-        }
-        if (user.role === UserRole.Owner && order.restaurant.ownerId !== user.id) {
-            canSee = false;
-        }
-        return canSee
-    }
-
 
     async getOrder(user: User, {id: orderId}: GetOrderInput): Promise<GetOrderOutput> {
         try {
@@ -164,7 +150,7 @@ export class OrderService {
                     error: "주문을 찾을 수 없습니다!"
                 }
             }
-            if (!this.canSeeOrder(user, order)) {
+            if (order.customerId !== user.id && order.driverId !== user.id && order.restaurant.ownerId !== user.id) {
                 return {
                     ok: false,
                     error: "권한이 없습니다"
@@ -182,60 +168,4 @@ export class OrderService {
         }
     }
 
-
-    async editOrder(user: User, {id: orderId, status}: EditOrderInput): Promise<EditOrderOutput> {
-        try {
-            const order = await this.orders.findOne(orderId, {relations: ['restaurant']});
-            if (!order) {
-                return {
-                    ok: false,
-                    error: "주문을 찾지 못하였습니다."
-                }
-            }
-
-            if (!this.canSeeOrder(user, order)) {
-                return {
-                    ok: false,
-                    error: "권한이 없습니다"
-                }
-            }
-
-            let canEdit = true;
-            if (user.role === UserRole.Client) {
-                canEdit = false;
-            }
-
-            if (user.role === UserRole.Owner) {
-                if (status !== OrderStatus.Cooking && status !== OrderStatus.Cooked) {
-                    canEdit = false;
-                }
-            }
-
-            if (user.role === UserRole.Delivery) {
-                if (status !== OrderStatus.PickedUp && status !== OrderStatus.Delivered) {
-                    canEdit = false;
-                }
-            }
-
-            if (!canEdit) {
-                return {
-                    ok: false,
-                    error: "권한이 없습니다."
-                }
-            }
-
-            await this.orders.save([{
-                id: orderId,
-                status,
-            }]);
-            return {
-                ok: true
-            }
-        } catch (error) {
-            return {
-                ok: false,
-                error
-            }
-        }
-    }
 }
