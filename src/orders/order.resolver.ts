@@ -9,8 +9,10 @@ import {GetOrdersInputType, GetOrdersOutput} from "./dtos/get-orders.dto";
 import {GetOrderInput, GetOrderOutput} from "./dtos/get-order.dto";
 import {EditOrderInput, EditOrderOutput} from "./dtos/edit-order.dto";
 import {Inject} from "@nestjs/common";
-import {NEW_PENDING_ORDER, PUB_SUB} from "../common/common.constants";
+import {NEW_COOKED_ORDER, NEW_ORDER_UPDATE, NEW_PENDING_ORDER, PUB_SUB} from "../common/common.constants";
 import {PubSub} from "graphql-subscriptions";
+import {OrderUpdatesInput} from "../common/dtos/order-updates.dto";
+import {TakeOrderInput, TakeOrderOutput} from "../common/dtos/take-order.dto";
 
 
 @Resolver(() => Order)
@@ -62,14 +64,45 @@ export class OrderResolver {
 
 
     @Subscription(() => Order, {
-        filter: (payload, _, context) => {
-            console.log(payload)
-            return true
-        }
+        filter: ({pendingOrders: {ownerId}}, _, {user}) => {
+            return ownerId === user.id;
+        },
+        resolve: ({pendingOrders: {order}}) => order,
     })
-    @Role(['Any'])
+    @Role(['Owner'])
     pendingOrders() {
         return this.pubSub.asyncIterator(NEW_PENDING_ORDER)
     }
+
+
+    @Subscription(() => Order)
+    @Role(['Delivery'])
+    cookedOrders() {
+        return this.pubSub.asyncIterator(NEW_COOKED_ORDER)
+    }
+
+    @Subscription(() => Order, {
+        filter: ({orderUpdates: order}: { orderUpdates: Order }, {input}: { input: OrderUpdatesInput }, {user}: { user: User }) => {
+            if (order.driverId !== user.id && order.customerId !== user.id && order.restaurant.ownerId !== user.id) {
+                return false;
+            }
+            return order.id === input.id
+        }
+    })
+    @Role(['Any'])
+    orderUpdates(@Args('input') OrderUpdatesInput: OrderUpdatesInput) {
+        return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
+    }
+
+
+    @Mutation(() => TakeOrderOutput)
+    @Role(['Delivery'])
+    takeOrder(
+        @Args('input') takeOrderInput : TakeOrderInput,
+        @AuthUser() driver: User,
+    ) : Promise<TakeOrderOutput> {
+        return this.ordersService.takeOrder(driver , takeOrderInput)
+    }
+
 
 }

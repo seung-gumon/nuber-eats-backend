@@ -10,8 +10,9 @@ import {Dish} from "../restaurants/entities/dish.entity";
 import {GetOrdersInputType, GetOrdersOutput} from "./dtos/get-orders.dto";
 import {GetOrderInput, GetOrderOutput} from "./dtos/get-order.dto";
 import {EditOrderInput, EditOrderOutput} from "./dtos/edit-order.dto";
-import {NEW_PENDING_ORDER, PUB_SUB} from "../common/common.constants";
+import {NEW_COOKED_ORDER, NEW_ORDER_UPDATE, NEW_PENDING_ORDER, PUB_SUB} from "../common/common.constants";
 import {PubSub} from "graphql-subscriptions";
+import {TakeOrderInput, TakeOrderOutput} from "../common/dtos/take-order.dto";
 
 @Injectable()
 export class OrderService {
@@ -90,7 +91,11 @@ export class OrderService {
                     items: orderItems
                 }),
             );
-            await this.pubSub.publish(NEW_PENDING_ORDER, {pendingOrders: order})
+            await this.pubSub.publish(NEW_PENDING_ORDER, {
+                pendingOrders: {
+                    order, ownerId: restaurant.ownerId
+                }
+            })
             return {
                 ok: true,
             }
@@ -161,7 +166,7 @@ export class OrderService {
 
     async getOrder(user: User, {id: orderId}: GetOrderInput): Promise<GetOrderOutput> {
         try {
-            const order = await this.orders.findOne(orderId, {relations: ['restaurant']});
+            const order = await this.orders.findOne(orderId);
             if (!order) {
                 return {
                     ok: false,
@@ -228,10 +233,21 @@ export class OrderService {
                 }
             }
 
-            await this.orders.save([{
+            await this.orders.save({
                 id: orderId,
                 status,
-            }]);
+            });
+
+            const newOrder = {...order, status}
+            if (user.role === UserRole.Owner) {
+                if (status === OrderStatus.Cooked) {
+                    await this.pubSub.publish(NEW_COOKED_ORDER, {cookedOrders: {...order, status}})
+                }
+            }
+
+            await this.pubSub.publish(NEW_ORDER_UPDATE, {orderUpdates: newOrder})
+
+
             return {
                 ok: true
             }
@@ -242,4 +258,40 @@ export class OrderService {
             }
         }
     }
+
+
+    async takeOrder(driver: User, {id: orderId}: TakeOrderInput): Promise<TakeOrderOutput> {
+        try {
+            const order = await this.orders.findOne(orderId);
+            if (!order) {
+                return {
+                    ok: false,
+                    error: "주문을 찾을 수 없습니다."
+                }
+            }
+
+            if (order.driver) {
+                return {
+                    ok: false,
+                    error: "배달원이 이미 배정되었습니다."
+                }
+            }
+
+            await this.orders.save({
+                id: orderId,
+                driver,
+            });
+            await this.pubSub.publish(NEW_ORDER_UPDATE, {orderUpdates: {...order, driver}});
+            return {
+                ok: true
+            }
+        } catch {
+            return {
+                ok: false,
+                error: "주문을 업데이트 하지 못하였습니다."
+            }
+        }
+    }
+
+
 }
