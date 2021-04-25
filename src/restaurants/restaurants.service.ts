@@ -1,7 +1,7 @@
 import {Restaurant} from "./entities/restaurant.entity";
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
-import {Repository , Raw} from "typeorm";
+import {Repository, Raw} from "typeorm";
 import {CreateRestaurantInput, CreateRestaurantOutput} from "./dtos/create-restaurant.dto";
 import {User} from "../users/entities/user.entity";
 import {Category} from "./entities/category.entity";
@@ -20,7 +20,6 @@ import {EditDishInput, EditDishOutput} from "./dtos/edit-dish.dto";
 import {DeleteDishInput, DeleteDishOutput} from "./dtos/delete-dish.dto";
 
 
-
 @Injectable()
 export class RestaurantsService {
     constructor(
@@ -28,7 +27,7 @@ export class RestaurantsService {
         private readonly restaurant: Repository<Restaurant>,
         private readonly categories: CategoryRepository,
         @InjectRepository(Dish)
-        private readonly dishes : Repository<Dish>
+        private readonly dishes: Repository<Dish>
     ) {
     }
 
@@ -158,6 +157,7 @@ export class RestaurantsService {
                 },
                 take: 25,
                 skip: (page - 1) * 25,
+                order: {isPromoted: "DESC"}
             });
             category.restaurants = restaurants;
             const totalResult = await this.countRestaurant(category);
@@ -177,10 +177,15 @@ export class RestaurantsService {
 
     async allRestaurants({page}: RestaurantsInput): Promise<RestaurantsOutput> {
         try {
-            const [restaurants, totalResults] = await this.restaurant.findAndCount({skip: (page - 1), take: 25});
+            const [restaurants, totalResults] = await this.restaurant.findAndCount(
+                {
+                    skip: (page - 1),
+                    take: 25,
+                    order: {isPromoted: "DESC"}
+                });
             return {
                 ok: true,
-                results : restaurants,
+                results: restaurants,
                 totalPages: Math.ceil(totalResults / 25),
                 totalResults
             }
@@ -192,47 +197,47 @@ export class RestaurantsService {
         }
     }
 
-    async findRestaurantById({restaurantId} : RestaurantInput) : Promise<RestaurantOutput> {
+    async findRestaurantById({restaurantId}: RestaurantInput): Promise<RestaurantOutput> {
         try {
-            const restaurant = await this.restaurant.findOne(restaurantId , {relations : ['menu']});
+            const restaurant = await this.restaurant.findOne(restaurantId, {relations: ['menu']});
             if (!restaurant) {
                 return {
-                    ok : false,
-                    error : '가게를 찾지 못하였습니다.'
+                    ok: false,
+                    error: '가게를 찾지 못하였습니다.'
                 }
             }
             return {
-                ok : true,
+                ok: true,
                 restaurant
             }
-        }catch {
+        } catch {
             return {
-                ok :false,
-                error : '가게를 찾지 못하였습니다'
-           }
+                ok: false,
+                error: '가게를 찾지 못하였습니다'
+            }
         }
     }
 
 
-    async searchRestaurantByName({query,page} : SearchRestaurantInput) : Promise<SearchRestaurantOutput> {
+    async searchRestaurantByName({query, page}: SearchRestaurantInput): Promise<SearchRestaurantOutput> {
         try {
             const [restaurants, totalResult] = await this.restaurant.findAndCount({
-                where : {
-                    name : Raw(name => `${name} ILIKE '%${query}%'`)
+                where: {
+                    name: Raw(name => `${name} ILIKE '%${query}%'`)
                 },
-                skip : (page - 1) * 25,
-                take : 25
+                skip: (page - 1) * 25,
+                take: 25
             });
             return {
-                ok : true,
+                ok: true,
                 restaurants,
-                totalResults : totalResult,
-                totalPages : Math.ceil(totalResult / 25)
+                totalResults: totalResult,
+                totalPages: Math.ceil(totalResult / 25)
             }
-        }catch{
+        } catch {
             return {
-                ok:false,
-                error : '가게를 찾지 못하였습니다'
+                ok: false,
+                error: '가게를 찾지 못하였습니다'
             }
         }
     }
@@ -260,7 +265,7 @@ export class RestaurantsService {
         } catch (error) {
             return {
                 ok: false,
-                error : '메뉴를 만들 수 없습니다.'
+                error: '메뉴를 만들 수 없습니다.'
             }
         }
     }
@@ -288,7 +293,7 @@ export class RestaurantsService {
                 }
             ])
             return {
-                ok : true
+                ok: true
             }
         } catch (error) {
             return {
@@ -315,7 +320,7 @@ export class RestaurantsService {
             }
             await this.dishes.delete(dishId);
             return {
-                ok : true,
+                ok: true,
             }
         } catch (error) {
             return {
@@ -324,7 +329,6 @@ export class RestaurantsService {
             }
         }
     }
-
 
 
 }

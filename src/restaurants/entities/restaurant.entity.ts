@@ -44,6 +44,13 @@ export class Restaurant extends CoreEntity {
     @RelationId((restaurant: Restaurant) => restaurant.owner)
     ownerId: number;
 
+    @Field(() => [Order])
+    @OneToMany(
+        type => Order,
+        order => order.restaurant
+    )
+    orders : Order[]
+
     @Field(() => [Dish])
     @OneToMany(
         type => Dish,
@@ -51,11 +58,14 @@ export class Restaurant extends CoreEntity {
     )
     menu: Dish[];
 
-    @Field(() => [Order])
-    @OneToMany(
-        type => Order,
-        order => order.restaurant
-    )
-    orders : Order[]
+
+    @Field(() => Boolean)
+    @Column({default : false})
+    isPromoted : boolean
+
+    @Field(() => Date , {nullable : true})
+    @Column({nullable : true})
+    promotedUntil : Date
+
 
 }
