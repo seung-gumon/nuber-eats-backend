@@ -117,7 +117,7 @@ export class UserService {
         ok: true,
       };
     } catch (error) {
-      return { ok: false, error: 'Could not update profile.' };
+      return { ok: false, error: '프로필을 업데이트 할 수 없습니다!' };
     }
   }
 
