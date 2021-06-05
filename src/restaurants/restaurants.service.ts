@@ -138,6 +138,23 @@ export class RestaurantsService {
         }
     }
 
+
+    async mainCategories(): Promise<AllCategoriesOutput> {
+        try {
+            const categories = await this.categories.find({relations: ['restaurants'] , take : 12});
+            return {
+                ok : true,
+                categories
+            }
+        } catch {
+            return {
+                ok : false,
+                error: '카테고리를 불러 올 수 없습니다.'
+            }
+        }
+    }
+
+
     countRestaurant(category: Category) {
         return this.restaurant.count({category});
     }

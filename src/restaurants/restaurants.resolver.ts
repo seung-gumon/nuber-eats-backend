@@ -94,6 +94,11 @@ export class CategoryResolver {
         return this.restaurantsService.allCategories();
     }
 
+    @Query(() => AllCategoriesOutput)
+    mainCategories(): Promise<AllCategoriesOutput> {
+        return this.restaurantsService.mainCategories();
+    }
+
     @Query(() => CategoryOutput)
     category(@Args('input') categoryInput: CategoryInput): Promise<CategoryOutput> {
         return this.restaurantsService.findCategoryBySlug(categoryInput)
