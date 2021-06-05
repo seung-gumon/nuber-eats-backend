@@ -125,7 +125,7 @@ export class RestaurantsService {
 
     async allCategories(): Promise<AllCategoriesOutput> {
         try {
-            const categories = await this.categories.find({relations: ['restaurants']});
+            const categories = await this.categories.find({select : ['id','name']});
             return {
                 ok: true,
                 categories
