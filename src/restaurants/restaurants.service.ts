@@ -18,6 +18,7 @@ import {CreateDishInput, CreateDishOutput} from "./dtos/create-dish.dto";
 import {Dish} from "./entities/dish.entity";
 import {EditDishInput, EditDishOutput} from "./dtos/edit-dish.dto";
 import {DeleteDishInput, DeleteDishOutput} from "./dtos/delete-dish.dto";
+import {MyRestaurantOutput} from "./dtos/my-restaurant.dto";
 
 
 @Injectable()
@@ -125,7 +126,7 @@ export class RestaurantsService {
 
     async allCategories(): Promise<AllCategoriesOutput> {
         try {
-            const categories = await this.categories.find({select : ['id','name']});
+            const categories = await this.categories.find({select: ['id', 'name']});
             return {
                 ok: true,
                 categories
@@ -141,15 +142,31 @@ export class RestaurantsService {
 
     async mainCategories(): Promise<AllCategoriesOutput> {
         try {
-            const categories = await this.categories.find({relations: ['restaurants'] , take : 12});
+            const categories = await this.categories.find({relations: ['restaurants'], take: 12});
             return {
-                ok : true,
+                ok: true,
                 categories
             }
         } catch {
             return {
-                ok : false,
+                ok: false,
                 error: '카테고리를 불러 올 수 없습니다.'
+            }
+        }
+    }
+
+
+    async myRestaurant(owner): Promise<MyRestaurantOutput> {
+        try {
+            const restaurants = await this.restaurant.find(owner);
+            return {
+                restaurants,
+                ok: true
+            }
+        } catch {
+            return {
+                ok: false,
+                error: '레스토랑을 찾을 수 없습니다'
             }
         }
     }
