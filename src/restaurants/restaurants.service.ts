@@ -159,6 +159,14 @@ export class RestaurantsService {
     async myRestaurant(owner): Promise<MyRestaurantOutput> {
         try {
             const restaurants = await this.restaurant.find(owner);
+
+            if (!restaurants) {
+                return {
+                    ok: false,
+                    error: "레스토랑을 찾지 못하였습니다. 레스토랑 생성 화면으로 이동됩니다."
+                }
+            }
+
             return {
                 restaurants,
                 ok: true
