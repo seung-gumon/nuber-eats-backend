@@ -158,7 +158,8 @@ export class RestaurantsService {
 
     async myRestaurant(owner): Promise<MyRestaurantOutput> {
         try {
-            const restaurants = await this.restaurant.find(owner);
+
+            const restaurants = await this.restaurant.find({owner});
 
             if (!restaurants) {
                 return {
@@ -171,7 +172,7 @@ export class RestaurantsService {
                 restaurants,
                 ok: true
             }
-        } catch {
+        } catch (e) {
             return {
                 ok: false,
                 error: '레스토랑을 찾을 수 없습니다'
