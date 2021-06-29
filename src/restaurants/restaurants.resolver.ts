@@ -72,7 +72,7 @@ export class RestaurantResolver {
     @Query(() => MyRestaurantOutput)
     @Role(["Owner"])
     myRestaurant(
-        @Args('owner') owner: User
+        @AuthUser() owner: User,
     ) : Promise<MyRestaurantOutput> {
         return this.restaurantService.myRestaurant(owner)
     }
