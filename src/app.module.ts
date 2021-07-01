@@ -40,7 +40,8 @@ import { UploadsModule } from './uploads/uploads.module';
                 PRIVATE_KEY: Joi.string().required(),
                 MAILGUN_API_KEY: Joi.string().required(),
                 MAILGUN_FROM_EMAIL: Joi.string().required(),
-                MAILGUN_DOMAIN_NAME: Joi.string().required()
+                MAILGUN_DOMAIN_NAME: Joi.string().required(),
+                AWS_SECRET_ACCESSKEY : Joi.string().required()
             }),
         }),
         TypeOrmModule.forRoot({

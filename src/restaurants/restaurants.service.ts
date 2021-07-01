@@ -46,7 +46,7 @@ export class RestaurantsService {
             return {
                 ok: true
             }
-        } catch {
+        } catch (e){
             return {
                 ok: false,
                 error: "새로운 레스토랑을 생성하지 못하였습니댜."
