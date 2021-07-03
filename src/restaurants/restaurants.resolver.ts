@@ -26,7 +26,7 @@ export class RestaurantResolver {
     constructor(private readonly restaurantService: RestaurantsService) {
     }
 
-    @Mutation(returns => CoreOutput)
+    @Mutation(returns => CreateRestaurantOutput)
     @Role(["Owner"])
     async createRestaurant(
         @AuthUser() authUser: User,
