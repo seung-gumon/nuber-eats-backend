@@ -18,7 +18,8 @@ import {CreateDishInput, CreateDishOutput} from "./dtos/create-dish.dto";
 import {Dish} from "./entities/dish.entity";
 import {EditDishInput, EditDishOutput} from "./dtos/edit-dish.dto";
 import {DeleteDishInput, DeleteDishOutput} from "./dtos/delete-dish.dto";
-import {MyRestaurantOutput} from "./dtos/my-restaurant.dto";
+import {MyRestaurantsOutput} from "./dtos/my-restaurants.dto";
+import {MyRestaurantInput, MyRestaurantOutput} from "./dtos/my-restaurant.dto";
 
 
 @Injectable()
@@ -157,7 +158,7 @@ export class RestaurantsService {
     }
 
 
-    async myRestaurant(owner): Promise<MyRestaurantOutput> {
+    async myRestaurants(owner): Promise<MyRestaurantsOutput> {
         try {
 
             const restaurants = await this.restaurant.find({owner});
@@ -177,6 +178,22 @@ export class RestaurantsService {
             return {
                 ok: false,
                 error: '레스토랑을 찾을 수 없습니다'
+            }
+        }
+    }
+
+
+    async myRestaurant(owner, {id}: MyRestaurantInput): Promise<MyRestaurantOutput> {
+        try {
+            const restaurant = await this.restaurant.findOne({owner, id});
+            return {
+                restaurant,
+                ok: true
+            }
+        } catch (e) {
+            return {
+                ok: false,
+                error: '레스토랑을 찾지 못하였습니다.'
             }
         }
     }
