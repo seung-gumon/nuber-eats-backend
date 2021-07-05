@@ -12,4 +12,6 @@ export class MyRestaurantInput extends PickType(Restaurant , ['id']){}
 export class MyRestaurantOutput extends CoreOutput {
     @Field(() => Restaurant, {nullable:true})
     restaurant ?: Restaurant
+
+
 }
