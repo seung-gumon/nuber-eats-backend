@@ -132,6 +132,7 @@ export class OrderService {
                     },
                     relations: ['orders']
                 });
+
                 orders = restaurants.flatMap(restaurant => restaurant.orders);
                 if (status) {
                     orders = orders.filter(order => order.status === status);
