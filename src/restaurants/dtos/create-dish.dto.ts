@@ -4,7 +4,7 @@ import {CoreOutput} from "../../common/dtos/output.dto";
 
 
 @InputType()
-export class CreateDishInput extends PickType(Dish , ['name','price','description','options']){
+export class CreateDishInput extends PickType(Dish , ['name','price','description','options','photo']){
     @Field(() => Int)
     restaurantId : number;
 }

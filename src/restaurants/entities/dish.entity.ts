@@ -31,7 +31,6 @@ export class Dish extends CoreEntity {
     @Field(type => String)
     @Column()
     @IsString()
-    @Length(5)
     name: string;
 
     @Field(type => Int)
@@ -46,7 +45,7 @@ export class Dish extends CoreEntity {
 
     @Field(type => String)
     @Column()
-    @Length(5, 140)
+    @Length(1, 140)
     description: string;
 
     @Field(type => Restaurant)
