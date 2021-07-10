@@ -22,6 +22,7 @@ import {MyRestaurantsOutput} from "./dtos/my-restaurants.dto";
 import {MyRestaurantInput, MyRestaurantOutput} from "./dtos/my-restaurant.dto";
 
 
+
 @Injectable()
 export class RestaurantsService {
     constructor(
@@ -185,9 +186,12 @@ export class RestaurantsService {
 
     async myRestaurant(owner, {id}: MyRestaurantInput): Promise<MyRestaurantOutput> {
         try {
+
+
             const restaurant = await this.restaurant.findOne({owner, id} , {
-                relations : ['menu']
+                relations : ['menu','orders'],
             });
+
             return {
                 restaurant,
                 ok: true

@@ -31,6 +31,14 @@ export class Restaurant extends CoreEntity {
     address: string
 
 
+    @Field(() => [Order])
+    @OneToMany(
+        type => Order,
+        order => order.restaurant
+    )
+    orders : Order[]
+
+
     @Field(type => Category, {nullable: true})
     @ManyToOne(type => Category, category => category.restaurants, {nullable: true, onDelete: "SET NULL", eager: true})
     category: Category;
@@ -44,12 +52,7 @@ export class Restaurant extends CoreEntity {
     @RelationId((restaurant: Restaurant) => restaurant.owner)
     ownerId: number;
 
-    @Field(() => [Order])
-    @OneToMany(
-        type => Order,
-        order => order.restaurant
-    )
-    orders : Order[]
+
 
     @Field(() => [Dish])
     @OneToMany(
