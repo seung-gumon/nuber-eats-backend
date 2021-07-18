@@ -37,7 +37,7 @@ import { UploadsModule } from './uploads/uploads.module';
                 DB_USERNAME: Joi.string(),
                 DB_PASSWORD: Joi.string(),
                 DB_NAME: Joi.string(),
-                PRIVATE_KEY: Joi.string().required(),
+                PRIVATE_KEY: Joi.string().required() ,
                 MAILGUN_API_KEY: Joi.string().required(),
                 MAILGUN_FROM_EMAIL: Joi.string().required(),
                 MAILGUN_DOMAIN_NAME: Joi.string().required(),
