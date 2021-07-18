@@ -56,6 +56,7 @@ import { UploadsModule } from './uploads/uploads.module';
             entities: [User, Verification, Restaurant, Category, Dish, Order, OrderItem , Payment],
         }),
         GraphQLModule.forRoot({
+            playground: process.env.NODE_ENV !== "production",
             installSubscriptionHandlers: true,
             autoSchemaFile: true,
             context: ({req, connection}) => {
