@@ -51,7 +51,7 @@ import { UploadsModule } from './uploads/uploads.module';
             username: process.env.USERNAME,
             password: process.env.PASSWORD,
             database: process.env.DB_NAME,
-            synchronize: process.env.NODE_ENV !== 'prod',
+            synchronize:process.env.NODE_ENV !== 'prod',
             logging: false,
             entities: [User, Verification, Restaurant, Category, Dish, Order, OrderItem , Payment],
         }),
