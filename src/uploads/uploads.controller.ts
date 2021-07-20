@@ -10,6 +10,7 @@ export class UploadsController {
     @Post('')
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(@UploadedFile() file) {
+        console.log(file);
         AWS.config.update({
             credentials: {
                 accessKeyId: 'AKIA2DVZ6WJL2FX3Y35G',
